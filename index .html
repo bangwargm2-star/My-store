@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apne Store</title>
+<style>
+:root{--bg:#fff;--soft:#f1f5f4;--tx:#10201e;--mu:#5f706d;--ac:#0f766e;--bd:#dbe4e2}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--tx);padding-bottom:70px}
+header{padding:26px 16px 20px;text-align:center;border-bottom:1px solid var(--bd);background:var(--soft)}
+header h1{margin:0;font-size:28px}header p{margin:6px 0 0;color:var(--mu)}
+.bar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.pill{padding:9px 15px;border-radius:999px;background:#fff;border:1px solid var(--bd);color:var(--tx);text-decoration:none;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit}
+main{max-width:1000px;margin:0 auto;padding:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.card{border:1px solid var(--bd);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;background:#fff}
+.card img,.ph{width:100%;aspect-ratio:1;object-fit:cover;background:var(--soft);display:block}
+.ci{padding:12px;display:flex;flex-direction:column;gap:6px;flex:1}.ci h3{margin:0;font-size:16px}.ci p{margin:0;color:var(--mu);font-size:13px;flex:1}
+.pr{font-weight:700;font-size:18px;color:var(--ac)}.two{display:grid;grid-template-columns:1fr auto;gap:6px}
+button{font:inherit;border:0;border-radius:10px;padding:11px 14px;background:var(--ac);color:#fff;font-weight:600;cursor:pointer}
+button:disabled{opacity:.6}button.s{background:var(--soft);color:var(--tx)}
+input,textarea{width:100%;font:inherit;padding:11px;border:1px solid var(--bd);border-radius:10px;margin-bottom:8px;background:#fff;color:var(--tx)}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:9}
+.mb{background:#fff;width:100%;max-width:460px;max-height:94%;overflow:auto;border-radius:16px 16px 0 0;padding:18px}
+@media(min-width:600px){.mo{align-items:center}.mb{border-radius:16px}}
+.mu{color:var(--mu);font-size:13px}.ok{background:#e6f5ee;border-radius:10px;padding:14px;margin-bottom:10px}.er{color:#b91c1c}
+.ln{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd);font-size:14px;align-items:center}
+#cb{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));max-width:500px;margin:0 auto;display:none;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+footer{text-align:center;color:var(--mu);font-size:13px;padding:22px}footer a{color:var(--ac);margin:0 6px}
+:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+</style></head><body>
+<header><h1 id="sn"></h1><p id="tg"></p><div class="bar"><button class="pill" onclick="share()">Store share karein</button></div></header>
+<main><div id="list" class="grid"></div></main>
+<footer><div id="ft"></div><div style="margin-top:8px">Share: <a id="fb" target="_blank" rel="noopener">Facebook</a><a id="wl" target="_blank" rel="noopener">WhatsApp</a></div></footer>
+<button id="cb" onclick="checkout()"></button>
+<script>
+/* ====== YAHAN SE STORE BADLEIN ====== */
+const STORE_NAME = "Apne Store";
+const TAGLINE = "Cash on Delivery - poore Pakistan mein delivery";
+const EMAIL = "bangwargm2@gmail.com";   // orders yahan aayenge
+const items = [
+  { id:'p1', name:'Shoes', price:5500, image:'', desc:'Aaram dah jootay' }
+  // Naya product: upar wali line copy karke id (p2, p3...), name, price, desc badlein
+  // image mein photo ka web link likh sakte hain (optional)
+];
+/* ==================================== */
+const $=s=>document.querySelector(s);
+const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let cart=[];
+document.title=STORE_NAME;$('#sn').textContent=STORE_NAME;$('#tg').textContent=TAGLINE;$('#ft').textContent=STORE_NAME+' - Cash on Delivery';
+$('#fb').href='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href);
+$('#wl').href='https://wa.me/?text='+encodeURIComponent(STORE_NAME+' - '+location.href);
+async function share(t){
+  const d={title:STORE_NAME,text:t||TAGLINE,url:location.href};
+  try{if(navigator.share){await navigator.share(d);return}}catch(e){return}
+  try{await navigator.clipboard.writeText(d.url);alert('Link copy ho gaya. Ab kahin bhi paste karein.')}catch(e){prompt('Yeh link copy karein:',d.url)}
+}
+$('#list').innerHTML=items.map(p=>`<div class="card">${p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">`:'<div class="ph"></div>'}
+<div class="ci"><h3>${esc(p.name)}</h3><p>${esc(p.desc)}</p><div class="pr">Rs. ${esc(p.price)}</div>
+<button onclick="checkout('${p.id}')">Buy Now</button>
+<div class="two"><button class="s" onclick="add('${p.id}')">Cart mein daalein</button><button class="s" onclick="share('${esc(p.name)} - Rs. ${esc(p.price)}')">Share</button></div></div></div>`).join('');
+function add(id){const l=cart.find(x=>x.id===id);l?l.q++:cart.push({id,q:1});bar()}
+function bar(){const n=cart.reduce((a,l)=>a+l.q,0),b=$('#cb');b.style.display=n?'block':'none';b.textContent='Cart dekhein ('+n+' items) - Order karein'}
+const P=id=>items.find(i=>i.id===id);
+const sum=ls=>ls.reduce((a,l)=>a+l.q*P(l.id).price,0);
+function checkout(one){
+  const ls=one?[{id:one,q:1}]:cart.map(l=>({...l}));if(!ls.length)return;
+  const m=document.createElement('div');m.className='mo';m.id='mo';
+  m.innerHTML=`<div class="mb"><h2 style="margin-top:0">Aap ka order</h2>${ls.map((l,i)=>`<div class="ln"><span>${esc(P(l.id).name)} (Rs. ${P(l.id).price})</span><input type="number" min="0" value="${l.q}" data-i="${i}" style="width:64px;margin:0" aria-label="Quantity"></div>`).join('')}
+  <p id="tt" style="font-weight:700">Total: Rs. ${sum(ls)}</p><p class="mu">Payment: Cash on Delivery</p>
+  <input id="cn" placeholder="Aap ka naam" autocomplete="name"><input id="cp" placeholder="Phone number" inputmode="tel" autocomplete="tel">
+  <input id="cc" placeholder="Shehar"><textarea id="ca" rows="2" placeholder="Poora address"></textarea><div id="rs"></div>
+  <button id="go" style="width:100%">Order Confirm Karein</button><button class="s" style="width:100%;margin-top:8px" onclick="$('#mo').remove()">Cancel</button></div>`;
+  document.body.appendChild(m);
+  m.addEventListener('input',e=>{const i=e.target.dataset.i;if(i==null)return;ls[i].q=Math.max(0,+e.target.value||0);$('#tt').textContent='Total: Rs. '+sum(ls)});
+  $('#go').onclick=async()=>{
+    const act=ls.filter(l=>l.q>0),n=$('#cn').value.trim(),ph=$('#cp').value.trim(),c=$('#cc').value.trim(),a=$('#ca').value.trim();
+    if(!act.length||!n||!ph||!c||!a){$('#rs').innerHTML='<p class="er">Tamam maloomat bharein.</p>';return}
+    const id='ORD'+Math.random().toString(36).slice(2,8).toUpperCase();
+    const prods=act.map(l=>P(l.id).name+' x'+l.q+' = Rs. '+l.q*P(l.id).price).join(', ');
+    $('#go').disabled=true;$('#go').textContent='Order ja raha hai...';
+    try{
+      const r=await fetch('https://formsubmit.co/ajax/'+EMAIL,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
+        body:JSON.stringify({_subject:'Naya Order '+id+' - '+STORE_NAME,_template:'table',_captcha:'false','Order No':id,'Products':prods,'Total':'Rs. '+sum(act),'Naam':n,'Phone':ph,'Shehar':c,'Address':a,'Payment':'Cash on Delivery'})});
+      if(!r.ok)throw 0;
+      if(!one){cart=[];bar()}
+      $('#rs').innerHTML='<div class="ok"><b>Order confirm ho gaya!</b><br>Order number: <b>'+id+'</b><br>Hum jald aap se rabta karenge. Payment delivery par hogi.</div>';
+      $('#go').style.display='none';
+    }catch(e){$('#go').disabled=false;$('#go').textContent='Order Confirm Karein';$('#rs').innerHTML='<p class="er">Order nahi ja saka. Internet check karke dobara koshish karein.</p>'}
+  };
+}
+</script></body></html>
